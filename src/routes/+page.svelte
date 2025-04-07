@@ -118,12 +118,12 @@
           <div class="space-y-4">
             <label class="block">
               <span class="section-title">Sum of Numbers*</span>
-              <input type="number" bind:value={sumOfNumbers} class="input-field" required />
+              <input type="number" bind:value={sumOfNumbers} class="input-field" pattern="[0-9]*" required />
             </label>
 
             <label class="block">
               <span class="section-title">Combination Length*</span>
-              <input type="number" bind:value={combinationLength} class="input-field" required />
+              <input type="number" bind:value={combinationLength} class="input-field" pattern="[0-9]*" required />
             </label>
           </div>
 
@@ -137,6 +137,7 @@
                     bind:value={numbersToInclude[i]}
                     class="input-field"
                     placeholder={`Number ${i + 1}`}
+                    pattern="[0-9]*"
                   />
                 {/each}
               </div>
@@ -151,6 +152,7 @@
                     bind:value={excludedNumbers[i]}
                     class="input-field"
                     placeholder={`Number ${i + 1}`}
+                    pattern="[0-9]*"
                   />
                 {/each}
               </div>
