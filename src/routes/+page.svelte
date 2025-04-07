@@ -112,7 +112,7 @@
 
     <div class="container mx-auto px-4 py-8 max-w-4xl">
       <div class="bg-white rounded-xl shadow-lg p-6 space-y-6">
-        <h1 class="text-3xl font-bold text-primary text-center mb-8">Number Permutation Calculator</h1>
+        <h1 class="text-3xl font-bold text-primary text-center mb-8">Killer Sudoku Helper</h1>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div class="space-y-4">
