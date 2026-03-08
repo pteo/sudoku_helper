@@ -186,9 +186,9 @@
 </script>
 
 <!-- ✅ Single container, everything inside the white card -->
-<div class="container mx-auto px-2 py-8 max-w-4xl">
-  <div class="bg-white rounded-xl shadow-lg p-6 space-y-6">
-    <h1 class="text-3xl font-bold text-primary text-center mb-8">Killer Sudoku Helper</h1>
+<div class="container mx-auto px-2 max-w-4xl">
+  <div class="bg-white rounded-xl shadow-lg p-6 space-y-4">
+    <h1 class="text-3xl font-bold text-primary text-center mb-4 leading-[0.8]">Killer Sudoku Helper</h1>
 
     <!-- Tabs -->
     <div class="flex border-b border-gray-200 mb-6">
