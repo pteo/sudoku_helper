@@ -1,4 +1,6 @@
 <script>
+  let activeTab = 'helper'; // 'helper' or 'calculator'
+  
   let sumOfNumbers = '';
   let combinationLength = '';
   let numbersToInclude = Array(6).fill('');
@@ -9,12 +11,92 @@
   let positionSummary = [];
   let validPositionNumbers = [];
 
+  // Calculator variables
+  let display = '0';
+  let calculationHistory = [];
+
   $: if (combinationLength && !isNaN(parseInt(combinationLength))) {
     validPositionNumbers = Array(parseInt(combinationLength)).fill('');
   }
 
   function clearValidPositionNumbers() {
     validPositionNumbers = validPositionNumbers.map(() => '');
+  }
+
+  // Calculator functions
+  function inputDigit(digit) {
+    display = display === '0' ? String(digit) : display + String(digit);
+  }
+
+  function clearDisplay() {
+    display = '0';
+  }
+
+  function backspace() {
+    display = display.length > 1 ? display.slice(0, -1) : '0';
+  }
+
+  function inputOperator(nextOperator) {
+    if (display === '0') {
+      if (nextOperator === '-') display = '-';
+      return;
+    }
+
+    if (/[+\-x÷]$/.test(display)) {
+      display = display.slice(0, -1) + nextOperator;
+      return;
+    }
+
+    if (display.endsWith('(')) return;
+    display += nextOperator;
+  }
+
+  function inputEquals() {
+    if (display === '0' || /[+\-x÷(]$/.test(display)) return;
+
+    const inputExpression = display;
+    const expression = display
+      .replace(/x/g, '*')
+      .replace(/÷/g, '/');
+
+    try {
+      const result = Function(`"use strict"; return (${expression});`)();
+      if (!Number.isFinite(result)) return;
+      const resultString = Number.isInteger(result) ? String(result) : String(Number(result.toFixed(10)));
+      calculationHistory = [
+        { expression: inputExpression, result: resultString },
+        ...calculationHistory
+      ].slice(0, 5);
+      display = resultString;
+    } catch {
+      // Keep current display if expression is invalid
+    }
+  }
+
+  function inputBracket(bracket) {
+    if (bracket === '(') {
+      if (display === '0') {
+        display = '(';
+        return;
+      }
+      if (/\d|\)$/.test(display)) {
+        display += 'x(';
+        return;
+      }
+      display += '(';
+      return;
+    }
+
+    const openCount = (display.match(/\(/g) || []).length;
+    const closeCount = (display.match(/\)/g) || []).length;
+    if (openCount <= closeCount) return;
+    if (/[+\-x÷(]$/.test(display)) return;
+
+    display += ')';
+  }
+
+  function input45() {
+    display = display === '0' ? '45' : display + '45';
   }
 
   function generatePermutations() {
@@ -108,6 +190,23 @@
   <div class="bg-white rounded-xl shadow-lg p-6 space-y-6">
     <h1 class="text-3xl font-bold text-primary text-center mb-8">Killer Sudoku Helper</h1>
 
+    <!-- Tabs -->
+    <div class="flex border-b border-gray-200 mb-6">
+      <button 
+        class="px-6 py-3 font-medium transition-colors {activeTab === 'helper' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:text-gray-700'}"
+        on:click={() => activeTab = 'helper'}
+      >
+        Sudoku Helper
+      </button>
+      <button 
+        class="px-6 py-3 font-medium transition-colors {activeTab === 'calculator' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:text-gray-700'}"
+        on:click={() => activeTab = 'calculator'}
+      >
+        Calculator
+      </button>
+    </div>
+
+    {#if activeTab === 'helper'}
     <!-- Sum + Length -->
     <div class="grid grid-cols-2 gap-6">
       <label class="block">
@@ -228,6 +327,60 @@
         </div>
       </div>
     {/if}
+    {/if}
 
+    {#if activeTab === 'calculator'}
+    <!-- Calculator -->
+    <div class="max-w-sm mx-auto">
+      <!-- History -->
+      <div class="bg-gray-50 rounded-lg p-3 mb-3 space-y-1 min-h-[120px]">
+        {#if calculationHistory.length > 0}
+          {#each calculationHistory as item}
+            <div class="text-right text-sm text-gray-600 font-mono break-all">
+              {item.expression} = {item.result}
+            </div>
+          {/each}
+        {/if}
+      </div>
+
+      <!-- Display -->
+      <div class="bg-gray-100 rounded-lg p-4 mb-4">
+        <div class="text-right text-2xl font-mono break-all">{display}</div>
+      </div>
+
+      <!-- Calculator Buttons -->
+      <div class="grid grid-cols-4 gap-2">
+        <!-- Row 1 -->
+        <button on:click={clearDisplay} class="calc-btn calc-btn-function">AC</button>
+        <button on:click={input45} class="calc-btn calc-btn-special">45</button>
+        <button on:click={backspace} class="calc-btn calc-btn-function">⌫</button>
+        <button on:click={() => inputOperator('÷')} class="calc-btn calc-btn-operator">÷</button>
+
+        <!-- Row 2 -->
+        <button on:click={() => inputDigit(7)} class="calc-btn">7</button>
+        <button on:click={() => inputDigit(8)} class="calc-btn">8</button>
+        <button on:click={() => inputDigit(9)} class="calc-btn">9</button>
+        <button on:click={() => inputOperator('x')} class="calc-btn calc-btn-operator">x</button>
+
+        <!-- Row 3 -->
+        <button on:click={() => inputDigit(4)} class="calc-btn">4</button>
+        <button on:click={() => inputDigit(5)} class="calc-btn">5</button>
+        <button on:click={() => inputDigit(6)} class="calc-btn">6</button>
+        <button on:click={() => inputOperator('-')} class="calc-btn calc-btn-operator">−</button>
+
+        <!-- Row 4 -->
+        <button on:click={() => inputDigit(1)} class="calc-btn">1</button>
+        <button on:click={() => inputDigit(2)} class="calc-btn">2</button>
+        <button on:click={() => inputDigit(3)} class="calc-btn">3</button>
+        <button on:click={() => inputOperator('+')} class="calc-btn calc-btn-operator">+</button>
+
+        <!-- Row 5 -->
+        <button on:click={() => inputDigit(0)} class="calc-btn">0</button>
+        <button on:click={() => inputBracket('(')} class="calc-btn calc-btn-function">(</button>
+        <button on:click={() => inputBracket(')')} class="calc-btn calc-btn-function">)</button>
+        <button on:click={inputEquals} class="calc-btn calc-btn-equals">=</button>
+      </div>
+    </div>
+    {/if}
   </div>
 </div>
