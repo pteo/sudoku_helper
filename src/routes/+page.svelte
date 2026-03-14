@@ -183,6 +183,56 @@
       .filter(n => !isNaN(n));
     return !validNumbers.includes(number);
   }
+
+  function digitsOnly(value) {
+    return String(value ?? '').replace(/\D/g, '');
+  }
+
+  function appendDigitToFocusedInput(digit) {
+    const activeElement = document.activeElement;
+    if (!(activeElement instanceof HTMLInputElement)) return;
+
+    const field = activeElement.dataset.field;
+    const index = activeElement.dataset.index;
+
+    if (!field) return;
+
+    if (field === 'sumOfNumbers') {
+      sumOfNumbers = digitsOnly(sumOfNumbers + digit);
+      clearValidPositionNumbers();
+      return;
+    }
+
+    if (field === 'combinationLength') {
+      combinationLength = digitsOnly(combinationLength + digit);
+      return;
+    }
+
+    if (field === 'maxRepeats') {
+      maxRepeats = digitsOnly(String(maxRepeats) + digit);
+      return;
+    }
+
+    const parsedIndex = Number.parseInt(index, 10);
+    if (Number.isNaN(parsedIndex)) return;
+
+    if (field === 'numbersToInclude') {
+      numbersToInclude[parsedIndex] = digitsOnly((numbersToInclude[parsedIndex] ?? '') + digit);
+      numbersToInclude = [...numbersToInclude];
+      return;
+    }
+
+    if (field === 'excludedNumbers') {
+      excludedNumbers[parsedIndex] = digitsOnly((excludedNumbers[parsedIndex] ?? '') + digit);
+      excludedNumbers = [...excludedNumbers];
+      return;
+    }
+
+    if (field === 'validPositionNumbers') {
+      validPositionNumbers[parsedIndex] = digitsOnly((validPositionNumbers[parsedIndex] ?? '') + digit);
+      validPositionNumbers = [...validPositionNumbers];
+    }
+  }
 </script>
 
 <!-- ✅ Single container, everything inside the white card -->
@@ -207,15 +257,53 @@
     </div>
 
     {#if activeTab === 'helper'}
+    <!-- Helper keypad -->
+    <div class="helper-keypad-wrap">
+      
+      <div class="grid grid-cols-5 md:grid-cols-10 gap-2">
+        {#each Array.from({ length: 10 }, (_, i) => i) as digit}
+          <button
+            class="helper-keypad-btn"
+            type="button"
+            on:mousedown|preventDefault
+            on:click={() => appendDigitToFocusedInput(digit)}
+          >
+            {digit}
+          </button>
+        {/each}
+      </div>
+    </div>
+
     <!-- Sum + Length -->
     <div class="grid grid-cols-2 gap-6">
       <label class="block">
         <span class="section-title">Sum of Numbers*</span>
-        <input type="number" bind:value={sumOfNumbers} on:change={clearValidPositionNumbers} class="input-field" pattern="[0-9]*" required />
+        <input
+          type="text"
+          inputmode="none"
+          data-field="sumOfNumbers"
+          bind:value={sumOfNumbers}
+          on:input={() => {
+            sumOfNumbers = digitsOnly(sumOfNumbers);
+            clearValidPositionNumbers();
+          }}
+          class="input-field"
+          pattern="[0-9]*"
+          required
+        />
       </label>
       <label class="block">
         <span class="section-title">Combination Length*</span>
-        <input type="number" bind:value={combinationLength} class="input-field" pattern="[0-9]*" required />
+        <input
+          type="text"
+          inputmode="none"
+          data-field="combinationLength"
+          bind:value={combinationLength}
+          on:input={() => combinationLength = digitsOnly(combinationLength)}
+          class="input-field"
+          pattern="[0-9]*"
+          required
+        />
       </label>
     </div>
 
@@ -225,8 +313,20 @@
         <h3 class="section-title">Numbers to be Included</h3>
         <div class="grid grid-cols-3 gap-2">
           {#each numbersToInclude as _, i}
-            <input type="number" bind:value={numbersToInclude[i]} class="input-field"
-              placeholder={`Number ${i + 1}`} pattern="[0-9]*" />
+            <input
+              type="text"
+              inputmode="none"
+              data-field="numbersToInclude"
+              data-index={i}
+              bind:value={numbersToInclude[i]}
+              on:input={() => {
+                numbersToInclude[i] = digitsOnly(numbersToInclude[i]);
+                numbersToInclude = [...numbersToInclude];
+              }}
+              class="input-field"
+              placeholder={`Number ${i + 1}`}
+              pattern="[0-9]*"
+            />
           {/each}
         </div>
       </div>
@@ -235,8 +335,20 @@
         <h3 class="section-title">Excluded Numbers</h3>
         <div class="grid grid-cols-3 gap-2">
           {#each excludedNumbers as _, i}
-            <input type="number" bind:value={excludedNumbers[i]} class="input-field"
-              placeholder={`Number ${i + 1}`} pattern="[0-9]*" />
+            <input
+              type="text"
+              inputmode="none"
+              data-field="excludedNumbers"
+              data-index={i}
+              bind:value={excludedNumbers[i]}
+              on:input={() => {
+                excludedNumbers[i] = digitsOnly(excludedNumbers[i]);
+                excludedNumbers = [...excludedNumbers];
+              }}
+              class="input-field"
+              placeholder={`Number ${i + 1}`}
+              pattern="[0-9]*"
+            />
           {/each}
         </div>
       </div>
@@ -250,9 +362,21 @@
           {#each validPositionNumbers as _, i}
             <label class="block">
               <span class="text-sm font-medium text-gray-600">Position {i + 1}</span>
-              <input type="text" bind:value={validPositionNumbers[i]} class="input-field"
-                placeholder="Enter valid numbers" pattern="[0-9]*"
-                title="Enter numbers without separators" />
+              <input
+                type="text"
+                inputmode="none"
+                data-field="validPositionNumbers"
+                data-index={i}
+                bind:value={validPositionNumbers[i]}
+                on:input={() => {
+                  validPositionNumbers[i] = digitsOnly(validPositionNumbers[i]);
+                  validPositionNumbers = [...validPositionNumbers];
+                }}
+                class="input-field"
+                placeholder="Enter valid numbers"
+                pattern="[0-9]*"
+                title="Enter numbers without separators"
+              />
             </label>
           {/each}
         </div>
@@ -269,7 +393,15 @@
       {#if repeatNumbers}
         <label class="block">
           <span class="section-title">Maximum number repeats allowed</span>
-          <input type="number" bind:value={maxRepeats} class="input-field" min="1" />
+          <input
+            type="text"
+            inputmode="none"
+            data-field="maxRepeats"
+            bind:value={maxRepeats}
+            on:input={() => maxRepeats = digitsOnly(maxRepeats)}
+            class="input-field"
+            min="1"
+          />
         </label>
       {/if}
     </div>
