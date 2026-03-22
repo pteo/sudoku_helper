@@ -233,6 +233,98 @@
       validPositionNumbers = [...validPositionNumbers];
     }
   }
+
+  function backspaceFromFocusedInput() {
+    const activeElement = document.activeElement;
+    if (!(activeElement instanceof HTMLInputElement)) return;
+
+    const field = activeElement.dataset.field;
+    const index = activeElement.dataset.index;
+
+    if (!field) return;
+
+    if (field === 'sumOfNumbers') {
+      sumOfNumbers = sumOfNumbers.slice(0, -1);
+      clearValidPositionNumbers();
+      return;
+    }
+
+    if (field === 'combinationLength') {
+      combinationLength = combinationLength.slice(0, -1);
+      return;
+    }
+
+    if (field === 'maxRepeats') {
+      maxRepeats = String(maxRepeats).slice(0, -1);
+      return;
+    }
+
+    const parsedIndex = Number.parseInt(index, 10);
+    if (Number.isNaN(parsedIndex)) return;
+
+    if (field === 'numbersToInclude') {
+      numbersToInclude[parsedIndex] = (numbersToInclude[parsedIndex] ?? '').slice(0, -1);
+      numbersToInclude = [...numbersToInclude];
+      return;
+    }
+
+    if (field === 'excludedNumbers') {
+      excludedNumbers[parsedIndex] = (excludedNumbers[parsedIndex] ?? '').slice(0, -1);
+      excludedNumbers = [...excludedNumbers];
+      return;
+    }
+
+    if (field === 'validPositionNumbers') {
+      validPositionNumbers[parsedIndex] = (validPositionNumbers[parsedIndex] ?? '').slice(0, -1);
+      validPositionNumbers = [...validPositionNumbers];
+    }
+  }
+
+  function clearFocusedInput() {
+    const activeElement = document.activeElement;
+    if (!(activeElement instanceof HTMLInputElement)) return;
+
+    const field = activeElement.dataset.field;
+    const index = activeElement.dataset.index;
+
+    if (!field) return;
+
+    if (field === 'sumOfNumbers') {
+      sumOfNumbers = '';
+      clearValidPositionNumbers();
+      return;
+    }
+
+    if (field === 'combinationLength') {
+      combinationLength = '';
+      return;
+    }
+
+    if (field === 'maxRepeats') {
+      maxRepeats = '';
+      return;
+    }
+
+    const parsedIndex = Number.parseInt(index, 10);
+    if (Number.isNaN(parsedIndex)) return;
+
+    if (field === 'numbersToInclude') {
+      numbersToInclude[parsedIndex] = '';
+      numbersToInclude = [...numbersToInclude];
+      return;
+    }
+
+    if (field === 'excludedNumbers') {
+      excludedNumbers[parsedIndex] = '';
+      excludedNumbers = [...excludedNumbers];
+      return;
+    }
+
+    if (field === 'validPositionNumbers') {
+      validPositionNumbers[parsedIndex] = '';
+      validPositionNumbers = [...validPositionNumbers];
+    }
+  }
 </script>
 
 <!-- ✅ Single container, everything inside the white card -->
@@ -271,6 +363,24 @@
             {digit}
           </button>
         {/each}
+        <button
+          class="helper-keypad-btn helper-keypad-btn-function"
+          type="button"
+          on:mousedown|preventDefault
+          on:click={backspaceFromFocusedInput}
+          title="Backspace"
+        >
+          ⌫
+        </button>
+        <button
+          class="helper-keypad-btn helper-keypad-btn-clear"
+          type="button"
+          on:mousedown|preventDefault
+          on:click={clearFocusedInput}
+          title="Clear"
+        >
+          AC
+        </button>
       </div>
     </div>
 
