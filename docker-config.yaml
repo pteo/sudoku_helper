@@ -1,0 +1,35 @@
+services:
+  sudoku-helper:
+    image: node:20-alpine
+    container_name: sudoku-helper
+    working_dir: /workspace
+    environment:
+      # Set these before first run.
+      # Example: export REPO_URL="https://github.com/<owner>/<repo>.git"
+      # Example: export REPO_BRANCH="main"
+      REPO_URL: ${REPO_URL:-https://github.com/pteo/sudoku-helper-v2.git}
+      REPO_BRANCH: ${REPO_BRANCH:-main}
+      HOST: 0.0.0.0
+      PORT: 5000
+    ports:
+      - "5000:5000"
+    volumes:
+      - sudoku_repo:/workspace
+    restart: unless-stopped
+    command: >
+      sh -lc "
+      apk add --no-cache git python3 make g++ &&
+      if [ ! -d /workspace/.git ]; then
+        git clone --branch \"$REPO_BRANCH\" --single-branch \"$REPO_URL\" /workspace;
+      else
+        cd /workspace &&
+        git pull --ff-only origin \"$REPO_BRANCH\";
+      fi &&
+      cd /workspace &&
+      npm ci &&
+      npm run build &&
+      npm run start
+      "
+
+volumes:
+  sudoku_repo:

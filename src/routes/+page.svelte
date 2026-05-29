@@ -79,7 +79,7 @@
         display = '(';
         return;
       }
-      if (/\d|\)$/.test(display)) {
+      if (/(\d|\))$/.test(display)) {
         display += 'x(';
         return;
       }
